@@ -7,6 +7,7 @@ const mongoose = require("mongoose")
 const logger = require("morgan")
 const session = require("express-session")
 const passport = require("./config/passport")
+const cors = require("cors")
 
 mongoose
   .connect("mongodb://localhost/server", { useNewUrlParser: true })
@@ -24,6 +25,12 @@ app.use(logger("dev"))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    credentials: true
+  })
+)
 app.use(
   session({
     secret: process.env.SECRET,
