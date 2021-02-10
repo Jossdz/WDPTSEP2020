@@ -31,6 +31,18 @@ const userSchema = new Schema(
         type: Schema.Types.ObjectId,
         ref: "Artist"
       }
+    ],
+    cols: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Col"
+      }
+    ],
+    orders: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Order"
+      }
     ]
   },
   {

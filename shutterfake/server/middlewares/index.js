@@ -20,3 +20,16 @@ exports.checkCredits = (req, res, next) => {
     return res.status(401).json({ message: "insufficient credits" })
   }
 }
+
+exports.isArtists = (req, res, next) => {
+  // Esta es la alternativa a encadenar los middlewares
+  // if(!req.isAuthenticated){
+  //   return res.status(401).json({ })
+  // }
+  if (!req.user.artist) {
+    return res
+      .status(401)
+      .json({ message: "No puedes crear cosos sin ser artista" })
+  }
+  next()
+}
