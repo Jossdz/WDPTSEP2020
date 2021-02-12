@@ -11,8 +11,8 @@ exports.loginProcess = (req, res, next) => {
 
     req.login(user, error => {
       if (error) return res.status(500).json({ message: errDetails })
-      user.password = null
-      res.status(200).json(user)
+      const { password, ...publicUserInfo } = user
+      res.status(200).json(publicUserInfo)
     })
   })(req, res, next)
 }
@@ -43,7 +43,8 @@ exports.signupProcess = (req, res, next) => {
     newUser
       .save()
       .then(() => {
-        res.json(newUser)
+        const { password, ...publicUserInfo } = newUser
+        res.status(200).json(publicUserInfo)
       })
       .catch(err => {
         res.status(500).json({ message: "Something went wrong" })
@@ -58,7 +59,8 @@ exports.logoutProcess = (req, res) => {
 
 exports.checkSession = (req, res) => {
   if (req.user) {
-    req.user.password = null
+    const { password, ...publicUserInfo } = user
+    return res.status(200).json(publicUserInfo)
   }
-  res.status(200).json(req.user || null)
+  res.status(200).json(null)
 }

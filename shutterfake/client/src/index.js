@@ -4,10 +4,13 @@ import "./index.css"
 import Router from "./Router"
 import reportWebVitals from "./reportWebVitals"
 import "antd/dist/antd.css"
+import { AuthProvider } from "./hooks/authContex"
 
 ReactDOM.render(
   <React.StrictMode>
-    <Router />
+    <AuthProvider>
+      <Router />
+    </AuthProvider>
   </React.StrictMode>,
   document.getElementById("root")
 )
