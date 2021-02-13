@@ -51,7 +51,7 @@ router.get("/artist/all", catchErrors(getAllArtists))
 router.get("/artist/:artistId", catchErrors(getArtistsById))
 
 //===========Cosos===========
-router.get("/coso/all", catchErrors(getAllCosos))
+router.get("/coso", catchErrors(getAllCosos))
 router.post("/coso", isAuth, isArtists, catchErrors(createCoso))
 router.get("/coso/:cosoId", catchErrors(getCosoById))
 router.patch("/coso/:cosoId", catchErrors(updateCoso))

@@ -2,6 +2,14 @@ const Artist = require("../models/Artist")
 const User = require("../models/User")
 const Rating = require("../models/Rating")
 
+const clearRes = data => {
+  //destructuramos el objeto "data" y retornamos un nuevo objeto unicamente con
+  // los datos requerido para nuestro "desarrollador = dev"
+  const { password, __v, createdAt, updatedAt, ...cleanedData } = data
+  // {key:"value"}
+  return cleanedData
+}
+
 exports.becomeArtist = async (req, res) => {
   // Si usan req user, siempre tienen que estar seguros de que quien accede, esta realmente logueado.
   const { _id } = req.user
@@ -28,9 +36,12 @@ exports.becomeArtist = async (req, res) => {
   // await User.findByIdAndUpdate(user.id, {artist: artist._id, isArtist: true})
   // 5. Guardar los cambios en el user
   await user.save()
-
+  const {
+    _doc: { password, ...rest }
+  } = user
+  console.log(rest)
   // responder...
-  res.status(201).json({ message: "asdfa" })
+  res.status(201).json(rest)
 }
 
 exports.updateArtistInfo = async (req, res) => {

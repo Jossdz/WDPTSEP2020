@@ -4,6 +4,14 @@ const passport = require("passport")
 const bcrypt = require("bcrypt")
 const bcryptSalt = 10
 
+const clearRes = data => {
+  //destructuramos el objeto "data" y retornamos un nuevo objeto unicamente con
+  // los datos requerido para nuestro "desarrollador = dev"
+  const { password, __v, createdAt, updatedAt, ...cleanedData } = data
+  // {key:"value"}
+  return cleanedData
+}
+
 exports.loginProcess = (req, res, next) => {
   passport.authenticate("local", (error, user, errDetails) => {
     if (error) return res.status(500).json({ message: errDetails })
@@ -11,18 +19,23 @@ exports.loginProcess = (req, res, next) => {
 
     req.login(user, error => {
       if (error) return res.status(500).json({ message: errDetails })
-      const { password, ...publicUserInfo } = user
-      res.status(200).json(publicUserInfo)
+      const usr = clearRes(user.toObject())
+      res.status(200).json(usr)
     })
   })(req, res, next)
 }
 
-exports.signupProcess = (req, res, next) => {
+exports.signupProcess = async (req, res) => {
   const { email, password, username } = req.body
 
   if (email === "" || password === "" || username === "") {
     res.status(400).json({ message: "Indicate email, username, and password" })
     return
+  }
+
+  const usernameExits = await User.findOne({ username })
+  if (usernameExits) {
+    return res.status(401).json({ message: "The username already exists" })
   }
 
   User.findOne({ email }, "email", (err, user) => {
@@ -42,12 +55,15 @@ exports.signupProcess = (req, res, next) => {
 
     newUser
       .save()
-      .then(() => {
-        const { password, ...publicUserInfo } = newUser
-        res.status(200).json(publicUserInfo)
+      .then(newUser => {
+        const {
+          _doc: { password, ...rest }
+        } = newUser
+        res.status(200).json(rest)
       })
       .catch(err => {
-        res.status(500).json({ message: "Something went wrong" })
+        console.log(err)
+        res.status(500).json({ message: err.message })
       })
   })
 }
@@ -59,8 +75,24 @@ exports.logoutProcess = (req, res) => {
 
 exports.checkSession = (req, res) => {
   if (req.user) {
-    const { password, ...publicUserInfo } = user
-    return res.status(200).json(publicUserInfo)
+    const usr = clearRes(req.user.toObject())
+    return res.status(200).json(usr)
   }
   res.status(200).json(null)
+}
+
+exports.changeAvatar = async (req, res) => {
+  const { avatar } = req.body
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { avatar } },
+    { new: true }
+  )
+
+  const {
+    _doc: { password, ...rest }
+  } = user
+
+  res.status(200).json(rest)
 }
