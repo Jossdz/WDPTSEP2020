@@ -1,5 +1,6 @@
 const Coso = require("../models/Coso")
 const Artist = require("../models/Artist")
+const mercadopago = require("../config/mercadopago")
 
 exports.getAllCosos = async (req, res) => {
   const cosos = await Coso.find()
@@ -9,7 +10,29 @@ exports.getCosoById = async (req, res) => {
   const { cosoId } = req.params
 
   const coso = await Coso.findById(cosoId)
-  res.status(200).json(coso)
+
+  //TODO: Tenemos que generar la preferencia para hacerle llegar a react,
+  // el dato para cobrar.
+  let preference = {
+    items: [
+      {
+        title: coso.name,
+        unit_price: Number(coso.price),
+        quantity: 1
+      }
+    ],
+    notification_url:
+      "https://webhook.site/1797d8db-4b84-4e9c-b608-0c12485f61aa",
+    back_urls: {
+      success: "http://localhost:3000/success",
+      failure: "http://localhost:3000/failure",
+      pending: "http://localhost:3000/pending"
+    }
+  }
+
+  const response = await mercadopago.preferences.create(preference)
+
+  res.status(200).json({ ...coso.toJSON(), preferenceId: response.body.id })
 }
 
 exports.createCoso = async (req, res) => {

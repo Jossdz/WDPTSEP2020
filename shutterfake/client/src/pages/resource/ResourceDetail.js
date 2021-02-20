@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+/* eslint-disable default-case */
+import { useEffect, useState, useRef } from "react"
 import { Row, Col, Typography, Skeleton, Button, Tag } from "antd"
 import { getOneResource } from "../../services/resources"
 
@@ -6,16 +7,29 @@ const { Title, Text } = Typography
 
 function ResourceDetail({ match: { params }, history }) {
   const [resource, setResource] = useState(null)
-
-  console.log(history)
+  const buyButtonRef = useRef()
 
   useEffect(() => {
     async function getResource() {
       const { data: resource } = await getOneResource(params.resourceId)
+
       setResource(resource)
     }
     getResource()
-  }, [])
+  }, [params.resourceId])
+
+  useEffect(() => {
+    if (resource) {
+      const script = document.createElement("script")
+      script.src =
+        "https://www.mercadopago.com.mx/integrations/v1/web-payment-checkout.js"
+      script.setAttribute("data-preference-id", resource.preferenceId)
+
+      if (buyButtonRef.current) {
+        buyButtonRef.current.appendChild(script)
+      }
+    }
+  }, [resource])
 
   function returnResourceTag(type) {
     switch (type) {
@@ -45,9 +59,7 @@ function ResourceDetail({ match: { params }, history }) {
           <Text type='secondary'>{resource.description}</Text>
         </p>
         {returnResourceTag(resource.type)}
-        <Button style={{ margin: "5px 0" }} block type='primary' size='large'>
-          Buy
-        </Button>
+        <div ref={buyButtonRef}></div>
         <Button style={{ margin: "5px 0" }} block type='dashed'>
           Edit
         </Button>
